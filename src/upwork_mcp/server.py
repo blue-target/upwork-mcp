@@ -12,18 +12,13 @@ from .tools.jobs import JobSearchParams, JobDetailsParams, search_jobs, get_job_
 from .tools.profile import get_my_profile, get_connects_balance, get_profile_stats
 from .tools.proposals import (
     ProposalsParams,
-    SubmitProposalParams,
     get_proposals,
     get_proposal_details,
-    submit_proposal,
-    withdraw_proposal,
 )
 from .tools.messages import (
     MessagesParams,
-    SendMessageParams,
     get_messages,
     get_conversation_messages,
-    send_message,
     get_unread_count,
 )
 from .tools.contracts import (
@@ -36,7 +31,11 @@ from .tools.contracts import (
 # Initialize FastMCP server
 mcp = FastMCP(
     name="upwork-mcp",
-    instructions="Upwork MCP Server - Search jobs, manage proposals, messages, and contracts via browser automation",
+    instructions=(
+        "Upwork MCP Server (READ-ONLY) - Search jobs, view proposals, "
+        "messages, and contracts via browser automation. Write actions "
+        "(submit/withdraw proposal, send message) are disabled."
+    ),
 )
 
 
@@ -150,40 +149,10 @@ async def upwork_get_proposal_details(
     return await get_proposal_details(proposal_url)
 
 
-@mcp.tool()
-async def upwork_submit_proposal(
-    job_url: Annotated[str, Field(description="Full Upwork job URL")],
-    cover_letter: Annotated[str, Field(description="Cover letter content")],
-    rate: Annotated[float | None, Field(description="Proposed hourly rate (for hourly jobs)")] = None,
-    bid: Annotated[float | None, Field(description="Bid amount (for fixed-price jobs)")] = None,
-    answers: Annotated[list[str] | None, Field(description="Answers to screening questions")] = None,
-) -> dict:
-    """Submit a proposal to an Upwork job.
-
-    IMPORTANT: This is a sensitive action that will spend Connects.
-    Make sure the cover letter and rate/bid are correct before submitting.
-
-    Returns submission status and connects used.
-    """
-    params = SubmitProposalParams(
-        job_url=job_url,
-        cover_letter=cover_letter,
-        rate=rate,
-        bid=bid,
-        answers=answers,
-    )
-    return await submit_proposal(params)
-
-
-@mcp.tool()
-async def upwork_withdraw_proposal(
-    proposal_url: Annotated[str, Field(description="URL to the proposal to withdraw")]
-) -> dict:
-    """Withdraw a submitted proposal.
-
-    Returns withdrawal status.
-    """
-    return await withdraw_proposal(proposal_url)
+# NOTE: upwork_submit_proposal and upwork_withdraw_proposal are intentionally
+# NOT registered as MCP tools. This server is configured as read-only to
+# prevent the LLM from spending Connects or modifying proposal state. The
+# underlying functions remain in tools/proposals.py for CLI/manual use only.
 
 
 # ============================================================================
@@ -217,17 +186,9 @@ async def upwork_get_conversation(
     return await get_conversation_messages(room_id, limit)
 
 
-@mcp.tool()
-async def upwork_send_message(
-    room_id: Annotated[str, Field(description="Chat room ID or URL")],
-    message: Annotated[str, Field(description="Message content to send")],
-) -> dict:
-    """Send a message in an Upwork conversation.
-
-    Returns send status.
-    """
-    params = SendMessageParams(room_id=room_id, message=message)
-    return await send_message(params)
+# NOTE: upwork_send_message is intentionally NOT registered as an MCP tool.
+# Read-only mode: the LLM cannot send messages on your behalf. The underlying
+# send_message function remains in tools/messages.py for manual use only.
 
 
 @mcp.tool()

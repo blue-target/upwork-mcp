@@ -81,6 +81,10 @@ Add to your MCP settings (`~/.config/claude-code/settings.json` or workspace set
 
 ### Available Tools
 
+This server is **read-only**: write actions (`submit_proposal`, `withdraw_proposal`,
+`send_message`) are intentionally not exposed as MCP tools so the LLM cannot
+spend Connects or modify your account.
+
 | Tool | Description |
 |------|-------------|
 | `upwork_search_jobs` | Search for jobs matching criteria |
@@ -90,11 +94,8 @@ Add to your MCP settings (`~/.config/claude-code/settings.json` or workspace set
 | `upwork_get_profile_stats` | Get earnings and work history stats |
 | `upwork_get_proposals` | Get your submitted proposals |
 | `upwork_get_proposal_details` | Get details of a specific proposal |
-| `upwork_submit_proposal` | Submit a proposal to a job |
-| `upwork_withdraw_proposal` | Withdraw a submitted proposal |
 | `upwork_get_messages` | Get inbox conversations |
 | `upwork_get_conversation` | Get messages in a conversation |
-| `upwork_send_message` | Send a message |
 | `upwork_get_unread_count` | Get unread message count |
 | `upwork_get_contracts` | Get your contracts |
 | `upwork_get_contract_details` | Get contract details |
